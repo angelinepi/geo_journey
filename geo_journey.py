@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QLocale, QTranslator, QCoreApplication
-from qgis.core import QgsSettings
+from qgis.core import QgsSettings, QgsProcessingModelAlgorithm
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
@@ -66,6 +66,25 @@ class GeoJourney:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
 
+        #Modeleur
+        self.model_path = os.path.join(
+            self.plugin_dir,
+            'model',
+            'geo_journey.model3'
+        )
+
+        #Styles
+        self.routes_styles = os.path.join(
+            self.plugin_dir,
+            'styles',
+            'arrows_routes_model_geojourney.qml'
+        )
+        self.routes_styles = os.path.join(
+            self.plugin_dir,
+            'styles',
+            'label_yellow_stops_model_geojourney.qml'
+        )
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -80,7 +99,6 @@ class GeoJourney:
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('GeoJourney', message)
-
 
     def add_action(
         self,
@@ -169,7 +187,6 @@ class GeoJourney:
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -178,6 +195,17 @@ class GeoJourney:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def load_model(self):
+        """Charger le modeleur"""
+        model = QgsProcessingModelAlgorithm()
+
+        if not model.fromFile(self.model_path):
+            raise Exception(
+                "Impossible de charger le modeleur : "
+                + self.model_path
+            )
+
+        return model
 
     def run(self):
         """Run method that performs all the real work"""
@@ -186,7 +214,16 @@ class GeoJourney:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = GeoJourneyDialog()
+            self.dlg = GeoJourneyDigitalog()
+
+        model = self.load_model()
+        print("Modeleur chargé :", model.name())
+        for param in model.parameterDefinitions():
+            print(
+                param.name(),
+                "->",
+                param.description()
+            )
 
         # show the dialog
         self.dlg.show()
