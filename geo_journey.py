@@ -25,6 +25,7 @@ from qgis.PyQt.QtCore import QLocale, QTranslator, QCoreApplication
 from qgis.core import QgsSettings, QgsProcessingModelAlgorithm
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+import processing
 
 # Import the code for the dialog
 from .geo_journey_dialog import GeoJourneyDialog
@@ -198,13 +199,8 @@ class GeoJourney:
     def load_model(self):
         """Charger le modeleur"""
         model = QgsProcessingModelAlgorithm()
-
         if not model.fromFile(self.model_path):
-            raise Exception(
-                "Impossible de charger le modeleur : "
-                + self.model_path
-            )
-
+            raise Exception( "Impossible de charger le modeleur : " + self.model_path)
         return model
 
     def run(self):
@@ -214,27 +210,30 @@ class GeoJourney:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = GeoJourneyDigitalog()
+            self.dlg = GeoJourneyDialog()
 
-        model = self.load_model()
-        print("Modeleur chargé :", model.name())
-        for param in model.parameterDefinitions():
-            print(
-                param.name(),
-                "->",
-                param.description()
-            )
-
-        # show the dialog
         self.dlg.show()
-        # Run the dialog event loop
         result = self.dlg.exec_()
-        # See if OK was pressed
         if result:
             input_file = self.dlg.inputmQgsFileWidget.filePath()
             if not input_file :
                 self.iface.messageBar().pushWarning("GeoJourney", "No source data selected.")
                 return
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+
+
+            model = self.load_model()
+
+            #DEBUGER :
+            print("Modeleur chargé :", model.name())
+            for param in model.parameterDefinitions():
+                print(
+                    param.name(),
+                    "->",
+                    param.description()
+                )
+
+            processing.run(model, {
+                'journey_csv_file': input_file,
+                # ... autres paramètres, cf. noms via param.name()
+            })
+
