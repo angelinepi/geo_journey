@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QLocale, QTranslator, QCoreApplication
-from qgis.core import QgsSettings, QgsProcessingModelAlgorithm
+from qgis.core import QgsSettings, QgsProcessingModelAlgorithm, QgsVectorLayer
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 import processing

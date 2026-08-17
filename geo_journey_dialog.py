@@ -26,6 +26,7 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from qgis.core import QgsVectorLayer
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -45,6 +46,7 @@ class GeoJourneyDialog(QtWidgets.QDialog, FORM_CLASS):
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
+        self.input_layer = None
         self.setupUi(self)
         self.inputmQgsFileWidget.fileChanged.connect(self.update_fields)
 
@@ -62,15 +64,17 @@ class GeoJourneyDialog(QtWidgets.QDialog, FORM_CLASS):
             return layer
 
     def update_fields(self, path : str ):
-        layer = self.read_file(path)
-        # self.load_fields(layer)
+        self.input_layer = self.read_file(path)
 
-        if layer is None :
+        self.stepmFieldComboBox.setLayer(self.input_layer)
+        self.movementmFieldComboBox.setLayer(self.input_layer)
+
+        if self.input_layer is None :
             self.stepmFieldComboBox.setLayer(None)
             self.movementmFieldComboBox.setLayer(None)
             return
         else :
-            print("Couche valide :", layer.isValid())
-            self.stepmFieldComboBox.setLayer(layer)
-            self.movementmFieldComboBox.setLayer(layer)
+            print("Couche valide :", self.input_layer.isValid())
+            self.stepmFieldComboBox.setLayer(self.input_layer)
+            self.movementmFieldComboBox.setLayer(self.input_layer)
             return
