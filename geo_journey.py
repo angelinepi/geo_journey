@@ -194,6 +194,10 @@ class GeoJourney:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            input_file = self.dlg.inputmQgsFileWidget.filePath()
+            if not input_file :
+                self.iface.messageBar().pushWarning("GeoJourney", "No source data selected.")
+                return
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
