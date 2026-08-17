@@ -46,3 +46,31 @@ class GeoJourneyDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.inputmQgsFileWidget.fileChanged.connect(self.update_fields)
+
+    def read_file(self, input_file : str) :
+
+        if os.path.splitext(input_file)[1].lower()  == '.csv' :
+            layer = QgsVectorLayer(f"file:///{input_file}?delimiter=,&detectTypes=yes", "input", "delimitedtext")
+        else :
+            layer = QgsVectorLayer(input_file, "input", "ogr")
+
+        if not layer.isValid():
+            print("Couche non chargée")
+            return None
+        else :
+            return layer
+
+    def update_fields(self, path : str ):
+        layer = self.read_file(path)
+        # self.load_fields(layer)
+
+        if layer is None :
+            self.stepmFieldComboBox.setLayer(None)
+            self.movementmFieldComboBox.setLayer(None)
+            return
+        else :
+            print("Couche valide :", layer.isValid())
+            self.stepmFieldComboBox.setLayer(layer)
+            self.movementmFieldComboBox.setLayer(layer)
+            return

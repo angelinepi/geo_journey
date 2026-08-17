@@ -220,6 +220,8 @@ class GeoJourney:
                 self.iface.messageBar().pushWarning("GeoJourney", "No source data selected.")
                 return
 
+            field_step = self.dlg.stepmFieldComboBox.currentField()
+            field_movement = self.dlg.movementmFieldComboBox.currentField()
 
             model = self.load_model()
 
@@ -234,6 +236,8 @@ class GeoJourney:
 
             processing.run(model, {
                 'journey_csv_file': input_file,
+                'ordered_field_name_of_a_journey' : field_step,
+                'booleen_field_name_for_movement' : field_movement,
                 # ... autres paramètres, cf. noms via param.name()
             })
 
